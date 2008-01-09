@@ -8,9 +8,36 @@ MAILDIR_ROOT = '/home/scott/Maildir'
 MAILDIR_BACKUP = '/home/scott/Mail-backup'
 
 class RGTERuleFinished < Exception
-  attr_reader :mailbox
-  def initialize(mailbox)
-    @mailbox = mailbox
+end
+
+class RGTEMessage
+  def initialize(filename)
+    @filename = filename
+  end
+  
+  def read
+    unless flags.include?('S')
+      flagged_name = add_flag('S')
+      FileUtils.mv(@filename, flagged_name)
+      @filename = flagged_name
+    end
+  end
+
+  private
+  def add_flag(flag)
+    f = flags
+    f << flag
+    "#{base}:2,#{f.uniq.sort.join}"
+  end
+
+  def base
+    @filename =~ /(.+):2,D?F?P?R?S?T?/
+    $1
+  end
+
+  def flags
+    @filename =~ /.+:2,(D?F?P?R?S?T?)/
+    $1.split('')
   end
 end
 
@@ -22,29 +49,31 @@ class RGTE
   def process!
     begin
       instance_eval(open("/home/scott/.rgte-rules").read)
-    rescue RGTERuleFinished => mb
-      save_to mb.mailbox
+    rescue RGTERuleFinished
     else
       save_to 'inbox'
     end
   end
 
-  def list(address, mailbox)
+  def list(address, mailbox, &block)
     [:to, :cc, :from].each do |header|
       if Array(@message.send(header)).any? {|addr| addr =~ /#{address}/i}
-        raise RGTERuleFinished.new(mailbox)
+        msg = save_to mailbox
+        yield(msg) if block_given?
+        raise RGTERuleFinished
       end
     end
   end
 
-  def pipe(process, match, mailbox)
+  def pipe(process, match, mailbox, &block)
     f = IO.popen(process, 'r+')
     f.print @message
     f.close_write
     output = f.read
     f.close_read
     if output =~ match
-      raise RGTERuleFinished.new(mailbox)
+      save_to mailbox
+      raise RGTERuleFinished
     end
   end
 
@@ -56,18 +85,17 @@ class RGTE
     end
   end
 
-
   private
   def save_to(mailbox)
     mbname = mailbox_name(mailbox)
     msname = message_filename
+    full_path = "#{mbname}/#{msname}"
     
     FileUtils.mkdir_p(mbname)
-    open("#{mbname}/#{msname}", 'w') do |f|
+    open(full_path, 'w') do |f|
       f.write @message
     end
-
-    true
+    RGTEMessage.new(full_path)
   end
 
   def mailbox_name(mailbox)
