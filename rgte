@@ -1,0 +1,89 @@
+#!/usr/bin/env ruby
+# -*- ruby -*-
+require 'rubygems'
+require 'tmail'
+require 'fileutils'
+
+MAILDIR_ROOT = '/home/scott/Maildir'
+MAILDIR_BACKUP = '/home/scott/Mail-backup'
+
+class RGTERuleFinished < Exception
+  attr_reader :mailbox
+  def initialize(mailbox)
+    @mailbox = mailbox
+  end
+end
+
+class RGTE
+  def initialize(str)
+    @message = TMail::Mail.parse str
+  end
+  
+  def process!
+    begin
+      instance_eval(open("/home/scott/.rgte-rules").read)
+    rescue RGTERuleFinished => mb
+      save_to mb.mailbox
+    else
+      save_to 'inbox'
+    end
+  end
+
+  def list(address, mailbox)
+    [:to, :cc, :from].each do |header|
+      if Array(@message.send(header)).any? {|addr| addr =~ /#{address}/i}
+        raise RGTERuleFinished.new(mailbox)
+      end
+    end
+  end
+
+  def pipe(process, match, mailbox)
+    f = IO.popen(process, 'r+')
+    f.print @message
+    f.close_write
+    output = f.read
+    f.close_read
+    if output =~ match
+      raise RGTERuleFinished.new(mailbox)
+    end
+  end
+
+  def backup
+    backupdir = "#{MAILDIR_BACKUP}/#{Time.now.strftime('%Y-%m')}/cur"
+    FileUtils.mkdir_p backupdir
+    open("#{backupdir}/#{message_filename}", 'w') do |f|
+      f.write @message
+    end
+  end
+
+
+  private
+  def save_to(mailbox)
+    mbname = mailbox_name(mailbox)
+    msname = message_filename
+    
+    FileUtils.mkdir_p(mbname)
+    open("#{mbname}/#{msname}", 'w') do |f|
+      f.write @message
+    end
+
+    true
+  end
+
+  def mailbox_name(mailbox)
+    if mailbox == 'inbox'
+      "#{MAILDIR_ROOT}/cur"
+    else
+      "#{MAILDIR_ROOT}/.#{mailbox.sub('/', '.')}/cur"
+    end
+  end
+
+  def message_filename
+    mid = "RGTE#{rand(100000)}#{Time.now.to_i.to_s}#{Process.pid}"
+    filebase = "#{Time.now.to_i.to_s}.#{mid}.rgte"
+    "#{filebase}:2,"
+  end
+end
+
+
+RGTE.new(STDIN.read).process!
