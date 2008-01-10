@@ -1,5 +1,6 @@
 require 'optparse'
 require File.join(File.dirname(__FILE__), 'rgte', 'rgte_message')
+require File.join(File.dirname(__FILE__), 'rgte', 'rgte_blank_message')
 require File.join(File.dirname(__FILE__), 'rgte', 'rgte_filter')
 
 module RGTE

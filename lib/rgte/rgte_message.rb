@@ -1,32 +1,57 @@
 module RGTE
   class Message
-    def initialize(filename)
-      @filename = filename
+    class << self
+      def message_filename
+        mid = "RGTE#{rand(100000)}#{Time.now.to_i.to_s}#{Process.pid}"
+        filebase = "#{Time.now.to_i.to_s}.#{mid}.rgte"
+        "#{filebase}:2,"
+      end
     end
     
+    def initialize(body)
+      @body = body
+      @saved = false
+      @flags = []
+      @mailbox = nil
+    end
+
     def read
-      unless flags.include?('S')
-        flagged_name = add_flag('S')
-        FileUtils.mv(@filename, flagged_name)
-        @filename = flagged_name
+      @flags << 'S' unless @flags.include?('S')
+      self
+    end
+
+    def saved?
+      @saved
+    end
+
+    def save(mailbox)
+      @mailbox = mailbox
+      @saved = true
+      self
+    end
+
+    def write
+      mbname = mailbox_name(@mailbox)
+      msname = message_filename
+      full_path = "#{mbname}/#{msname}"
+      
+      FileUtils.mkdir_p(mbname)
+      open(full_path, 'w') do |f|
+        f.write @body
       end
     end
 
     private
-    def add_flag(flag)
-      f = flags
-      f << flag
-      "#{base}:2,#{f.uniq.sort.join}"
+    def mailbox_name(mailbox)
+      if mailbox == 'inbox'
+        "#{RGTE::MAILDIR_ROOT}/cur"
+      else
+        "#{RGTE::MAILDIR_ROOT}/.#{mailbox.sub('/', '.')}/cur"
+      end
     end
 
-    def base
-      @filename =~ /(.+):2,D?F?P?R?S?T?/
-      $1
-    end
-
-    def flags
-      @filename =~ /.+:2,(D?F?P?R?S?T?)/
-      $1.split('')
+    def message_filename
+      "#{self.class.message_filename}#{@flags.uniq.sort.join}"
     end
   end
 end
