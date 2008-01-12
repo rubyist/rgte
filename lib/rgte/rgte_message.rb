@@ -1,4 +1,5 @@
 module RGTE
+  
   class Message
     class << self
       def message_filename
@@ -39,6 +40,10 @@ module RGTE
       open(full_path, 'w') do |f|
         f.write @body
       end
+    end
+
+    def halt
+      raise RGTE::HaltFilter
     end
 
     private

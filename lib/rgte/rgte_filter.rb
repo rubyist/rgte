@@ -6,6 +6,8 @@ module RGTE
   MAILDIR_ROOT = '/home/scott/Maildir'
   MAILDIR_BACKUP = '/home/scott/Mail-backup'
 
+  class HaltFilter < Exception;end
+
   class Filter
     def initialize(str)
       @message = TMail::Mail.parse str
@@ -14,9 +16,14 @@ module RGTE
     end
     
     def process!
-      instance_eval(open("/home/scott/.rgte-rules").read)
-      @rgte_message.save('inbox') unless @rgte_message.saved?
-      @rgte_message.write
+      begin
+        instance_eval(open("/home/scott/.rgte-rules").read)
+      rescue RGTE::HaltFilter
+      ensure
+        # TODO if we halt but haven't saved, default to the inbox or don't save?
+        @rgte_message.save('inbox') unless @rgte_message.saved?
+        @rgte_message.write
+      end
     end
 
     def group(name, *args)
