@@ -63,6 +63,17 @@ module RGTE
       end
     end
 
+    def header(header, match, mailbox=nil)
+      return RGTE::BlankMessage if @rgte_message.saved? && !mailbox.nil?
+      
+      if @message[header].to_s =~ /#{match}/i
+        @rgte_message.save(mailbox) if mailbox
+        @rgte_message
+      else
+        RGTE::BlankMessage
+      end
+    end
+
     def pipe(process, match, mailbox=nil)
       return RGTE::BlankMessage if @rgte_message.saved? && !mailbox.nil?
 
