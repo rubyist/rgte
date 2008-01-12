@@ -74,6 +74,10 @@ module RGTE
       end
     end
 
+    def subject(subj, mailbox=nil)
+      header('subject', subj, mailbox)
+    end
+
     def pipe(process, match, mailbox=nil)
       return RGTE::BlankMessage if @rgte_message.saved? && !mailbox.nil?
 
