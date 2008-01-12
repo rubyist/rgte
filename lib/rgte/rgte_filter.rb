@@ -62,11 +62,10 @@ module RGTE
 
     # list is a special construct for mailing lists that matches To, Cc, From
     def list(addrs, mailbox=nil)
-      if to(addrs, mailbox).matched? || cc(addrs, mailbox).matched? || from(addrs, mailbox).matched?
-        @rgte_message
-      else
-        RGTE::BlankMessage
-      end
+      return @rgte_message if to(addrs, mailbox).matched?
+      return @rgte_message if cc(addrs, mailbox).matched?
+      return @rgte_message if from(addrs, mailbox).matched?
+      RGTE::BlankMessage
     end
 
     def subject(subj, mailbox=nil)
