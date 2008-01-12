@@ -46,6 +46,10 @@ module RGTE
       raise RGTE::HaltFilter
     end
 
+    def matched?
+      true
+    end
+
     private
     def mailbox_name(mailbox)
       if mailbox == 'inbox'

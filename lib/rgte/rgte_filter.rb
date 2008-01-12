@@ -31,43 +31,20 @@ module RGTE
     end
 
     def from(addrs, mailbox=nil)
-      return RGTE::BlankMessage if @rgte_message.saved? && !mailbox.nil?
-      
-      addresses = address_lookup(addrs)
+      address_match('from', addrs, mailbox)
+    end
 
-      if addresses.any? {|addr| Array(@message.from).any? {|a| a =~ /#{addr}/i}}
-        @rgte_message.save(mailbox) if mailbox
-        @rgte_message
-      else
-        RGTE::BlankMessage
-      end
+    def to(addrs, mailbox=nil)
+      address_match('to', addrs, mailbox)
+    end
+
+    def cc(addrs, mailbox=nil)
+      address_match('cc', addrs, mailbox)
     end
 
     # list is a special construct for mailing lists that matches To, Cc, From
     def list(addrs, mailbox=nil)
-      return RGTE::BlankMessage if @rgte_message.saved? && !mailbox.nil?
-
-      addresses = address_lookup(addrs)
-      found = false
-
-      [:to, :cc, :from].each do |header|
-        found = true if addresses.any? {|addr| Array(@message.send(header)).any? {|a| a =~ /#{addr}/i} }
-        break if found
-      end
-
-      if found
-        @rgte_message.save(mailbox) if mailbox
-        @rgte_message
-      else
-        RGTE::BlankMessage
-      end
-    end
-
-    def header(header, match, mailbox=nil)
-      return RGTE::BlankMessage if @rgte_message.saved? && !mailbox.nil?
-      
-      if @message[header].to_s =~ /#{match}/i
-        @rgte_message.save(mailbox) if mailbox
+      if to(addrs, mailbox).matched? || cc(addrs, mailbox).matched? || from(addrs, mailbox).matched?
         @rgte_message
       else
         RGTE::BlankMessage
@@ -78,6 +55,10 @@ module RGTE
       header('subject', subj, mailbox)
     end
 
+    def header(header, match, mailbox=nil)
+      save_or_blank(matches_header?(header, match), mailbox)
+    end
+
     def pipe(process, match, mailbox=nil)
       return RGTE::BlankMessage if @rgte_message.saved? && !mailbox.nil?
 
@@ -86,12 +67,8 @@ module RGTE
       f.close_write
       output = f.read
       f.close_read
-      if output =~ match
-        @rgte_message.save(mailbox) if mailbox
-        @rgte_message
-      else
-        RGTE::BlankMessage
-      end
+
+      save_or_blank(output =~ match, mailbox)
     end
 
     def backup
@@ -105,6 +82,29 @@ module RGTE
     private
     def address_lookup(addrs)
       addrs.is_a?(Symbol) ? @groups[addrs] : Array(addrs)
+    end
+
+    def matches_header?(header, match)
+      @message[header].to_s =~ /#{match}/i
+    end
+
+    def address_match(header, addrs, mailbox=nil)
+      return RGTE::BlankMessage if @rgte_message.saved? && !mailbox.nil?
+
+      addresses = address_lookup(addrs)
+
+      save_or_blank(addresses.any? {|addr| matches_header?(header, addr)}, mailbox)
+    end
+
+    def save_or_blank(pred, mailbox)
+      return RGTE::BlankMessage if @rgte_message.saved? && !mailbox.nil?
+
+      if pred
+        @rgte_message.save(mailbox) if mailbox
+        @rgte_message
+      else
+        RGTE::BlankMessage
+      end
     end
   end
 end
