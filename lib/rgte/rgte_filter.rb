@@ -3,13 +3,27 @@ require 'tmail'
 require 'fileutils'
 
 module RGTE
-  MAILDIR_ROOT = '/home/scott/Maildir'
-  MAILDIR_BACKUP = '/home/scott/Mail-backup'
-
   class HaltFilter < Exception;end
+
+  class Config
+    class << self
+      def [](key)
+        @config ||= {}
+        @config[key]
+      end
+
+      def []=(key, val)
+        @config ||= {}
+        @config[key] = val
+      end
+    end
+  end
 
   class Filter
     def initialize(str)
+      RGTE::Config[:maildir_root] = File.join("#{ENV['HOME']}", 'Maildir')
+      RGTE::Config[:maildir_backup] = File.join("#{ENV['HOME']}", 'Mail-backup')
+      
       @message = TMail::Mail.parse str
       @rgte_message = RGTE::Message.new str
       @groups = {}
@@ -24,6 +38,10 @@ module RGTE
         @rgte_message.save('inbox') unless @rgte_message.saved?
         @rgte_message.write
       end
+    end
+
+    def config(config_hash)
+      config_hash.each { |k, v| RGTE::Config[k] = v }
     end
 
     def group(name, *args)
@@ -72,7 +90,7 @@ module RGTE
     end
 
     def backup
-      backupdir = "#{RGTE::MAILDIR_BACKUP}/#{Time.now.strftime('%Y-%m')}/cur"
+      backupdir = File.join(RGTE::Config[:maildir_backup], Time.now.strftime('%Y-%m'), '/cur')
       FileUtils.mkdir_p backupdir
       open("#{backupdir}/#{RGTE::Message.message_filename}", 'w') do |f|
         f.write @message

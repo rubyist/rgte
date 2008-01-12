@@ -1,5 +1,4 @@
 module RGTE
-  
   class Message
     class << self
       def message_filename
@@ -53,9 +52,9 @@ module RGTE
     private
     def mailbox_name(mailbox)
       if mailbox == 'inbox'
-        "#{RGTE::MAILDIR_ROOT}/cur"
+        File.join(RGTE::Config[:maildir_root], '/cur')
       else
-        "#{RGTE::MAILDIR_ROOT}/.#{mailbox.sub('/', '.')}/cur"
+        File.join(RGTE::Config[:maildir_root], ".#{mailbox.sub('/', '.')}", 'cur')
       end
     end
 
