@@ -1,1 +1,62 @@
-THIS IS RGTE!
+= RGTE: An email filter
+
+RGTE is a small, opinionated email filter which processes and filters incoming email into Maildirs.
+
+== License
+
+RGTE is copyright 2008 Scott Barron.  It is licensed under the MIT license.  See the included MIT-LICENSE file for details.
+
+== Usage
+
+Set up whatever processes your incoming mail to pipe through rgte.  Examples:
+
+Using .forward:
+
+  $ cat ~/.forward
+  "|exec /usr/local/bin/rgte"
+
+
+Using procmail:
+
+  $ cat ~/.procmail
+  :0:
+  | /usr/local/bin/rgte
+
+
+Using fetchmail:
+
+  $ cat ~/.fetchmailrc
+  poll myaccount.email.com protocol imap:
+    user "foo@example.com" there has password "blah" ssl
+    is "foo" here and wants mda "/usr/local/bin/rgte"
+
+
+Write your filters in ~/.rgte
+  
+  # Set up some configuration
+  config :maildir_root => '/home/scott/Maildir', :maildir_backup => '/home/scott/Mail-backup'
+
+  # Keep a copy of every email in :maildir_backup
+  backup
+
+  # sets up an alias, :me, containing my addresses
+  group :me, 'scott@elitists.net', 'scott@somewhereelse.com'
+
+  # Mark every message that's From the :me alias as read
+  from(:me).read
+
+  # Pipe the mail through spamprobe, file it into @spam if it's a hit and halt processing
+  pipe('/usr/bin/spamprobe train', /^SPAM/, '@spam').halt
+
+  # Put every message From this address into archive and mark it read
+  from('automail@easydraft.com', 'archive').read
+
+  # Email lists - list is a shorthand that matches To, Cc, and From
+  list 'homebrew@hbd.org',                        'lists/hbd'
+  list 'ruby-core@ruby-lang.org',                 'lists/rubycore'
+  list 'dtrace-discuss@opensolaris.org',          'lists/dtrace'
+
+== Contact
+
+Send questions or feedback to Scott Barron (scott@elitists.net).
+
