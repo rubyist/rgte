@@ -14,6 +14,8 @@ rescue Exception
   nil
 end
 
+require 'rake/rdoctask'
+
 if `ruby -Ilib ./bin/rgte -v` =~ /rgte, version ([0-9.]+)$/
   CURRENT_VERSION = $1
 else
@@ -23,8 +25,19 @@ $package_version = CURRENT_VERSION
 
 PKG_FILES = FileList['[A-Z]*',
                      'bin/**/*',
-                     'lib/**/*.rb'
+                     'lib/**/*.rb',
+                     'doc/**/*'
                     ]
+
+rd = Rake::RDocTask.new("rdoc") do |rdoc|
+  rdoc.rdoc_dir = 'html'
+  rdoc.title = "RGTE"
+  rdoc.options << '--line-numbers' << '--inline-source' <<
+    '--main' << 'README' <<
+    '--title' << 'RGTE'
+  rdoc.rdoc_files.include('README', 'MIT-LICENSE')
+  rdoc.rdoc_files.include('lib/**/*.rb', 'doc/**/*.rdoc')
+end
 
 if !defined?(Gem)
   puts "Package target requires RubyGEMs"
@@ -45,8 +58,12 @@ EOF
 
     s.executables = ['rgte']
     s.default_executable = 'rgte'
+    
+    s.add_dependency 'tmail'
 
     s.has_rdoc = true
+    s.extra_rdoc_files = rd.rdoc_files.reject {|fn| fn =~ /\.rb$/}.to_a
+    s.rdoc_options = rd.options
 
     s.author = 'Scott Barron'
     s.email = 'scott@elitists.net'
