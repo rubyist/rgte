@@ -46,7 +46,7 @@ EOF
     s.executables = ['rgte']
     s.default_executable = 'rgte'
 
-    s.has_rdoc = false
+    s.has_rdoc = true
 
     s.author = 'Scott Barron'
     s.email = 'scott@elitists.net'
