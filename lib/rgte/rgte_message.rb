@@ -1,14 +1,14 @@
 module RGTE
   class Message
     class << self
-      def message_filename
+      def message_filename #:nodoc:
         mid = "RGTE#{rand(100000)}#{Time.now.to_i.to_s}#{Process.pid}"
         filebase = "#{Time.now.to_i.to_s}.#{mid}.rgte"
         "#{filebase}:2,"
       end
     end
     
-    def initialize(body)
+    def initialize(body) #:nodoc:
       @body = body
       @saved = false
       @flags = []
@@ -34,7 +34,7 @@ module RGTE
       self
     end
 
-    def write
+    def write #:nodoc:
       return unless saved?
       
       mbname = mailbox_name(@mailbox)
@@ -51,7 +51,7 @@ module RGTE
       raise RGTE::HaltFilter
     end
 
-    def matched?
+    def matched? #:nodoc:
       true
     end
 

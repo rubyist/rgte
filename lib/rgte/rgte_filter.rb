@@ -5,7 +5,7 @@ require 'fileutils'
 module RGTE
   class HaltFilter < Exception;end
 
-  class Config
+  class Config       #:nodoc:
     class << self
       def [](key)
         @config ||= {}
@@ -20,7 +20,7 @@ module RGTE
   end
 
   class Filter
-    def initialize(str)
+    def initialize(str) #:nodoc:
       RGTE::Config[:maildir_root] = File.join("#{ENV['HOME']}", 'Maildir')
       RGTE::Config[:maildir_backup] = File.join("#{ENV['HOME']}", 'Mail-backup')
       
@@ -29,7 +29,7 @@ module RGTE
       @groups = {}
     end
     
-    def process!
+    def process! #:nodoc:
       begin
         instance_eval(open("/home/scott/.rgte-rules").read)
       rescue RGTE::HaltFilter
@@ -60,7 +60,7 @@ module RGTE
       address_match('cc', addrs, mailbox)
     end
 
-    # list is a special construct for mailing lists that matches To, Cc, From
+    # A special construct for mailing lists that matches To, Cc, From
     def list(addrs, mailbox=nil)
       return @rgte_message if to(addrs, mailbox).matched?
       return @rgte_message if cc(addrs, mailbox).matched?

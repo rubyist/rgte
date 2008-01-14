@@ -7,14 +7,14 @@ module RGTE
   VERSION = '0.0.1'
 
   class << self
-    def application
+    def application #:nodoc:
       @application ||= RGTE::Application.new
     end
   end
 end
 
 module RGTE
-  class Application
+  class Application #:nodoc:
     def initialize
       OptionParser.new do |opts|
         opts.banner = "Usage: rgte [options] < <file>"

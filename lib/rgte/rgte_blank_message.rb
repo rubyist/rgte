@@ -1,5 +1,5 @@
 module RGTE
-  class BlankMessage
+  class BlankMessage #:nodoc:
     class << self
       def matched?
         false
