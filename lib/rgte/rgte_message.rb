@@ -20,6 +20,10 @@ module RGTE
       self
     end
 
+    def read?
+      @flags.include?('S')
+    end
+
     def saved?
       @saved
     end
@@ -31,12 +35,14 @@ module RGTE
     end
 
     def write
+      return unless saved?
+      
       mbname = mailbox_name(@mailbox)
       msname = message_filename
       full_path = "#{mbname}/#{msname}"
       
       FileUtils.mkdir_p(mbname)
-      open(full_path, 'w') do |f|
+      File.open(full_path, 'w') do |f|
         f.write @body
       end
     end

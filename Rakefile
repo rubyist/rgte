@@ -9,6 +9,7 @@
 begin
   require 'rubygems'
   require 'rake/gempackagetask'
+  require 'spec/rake/spectask'
 rescue Exception
   nil
 end
@@ -58,3 +59,23 @@ EOF
   end
 end
 
+if !defined?(Spec)
+  puts "spec and cruise targets requires RSpec"
+else
+  desc "Run all examples with RCov"
+  Spec::Rake::SpecTask.new('cruise') do |t|
+    t.spec_files = FileList['spec/**/*.rb']
+    t.rcov = true
+    t.rcov_opts = ['--exclude', 'spec']
+  end
+  
+  desc "Run all examples"
+  Spec::Rake::SpecTask.new('spec') do |t|
+    t.spec_files = FileList['spec/**/*.rb']
+    t.rcov = false
+    t.spec_opts = ['-cfs']
+  end
+end
+
+
+task :default => [:spec]
