@@ -8,9 +8,11 @@ RGTE is copyright 2008 Scott Barron.  It is licensed under the MIT license.  See
 
 == Installation
 
-$ [sudo] gem install --source http://rubyi.st/ rgte
+$ [sudo] gem install --source http://rubyi.st/gems/ rgte
 
 One of these days I'll register a Rubyforge project for the gem, but that's such a pain.
+
+And don't forget that trailing slash - otherwise it doesn't go.
 
 == Usage
 
