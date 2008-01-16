@@ -1,0 +1,10 @@
+*0.0.2* (January 16, 2008)
+
+* Removed hardcoded path to /home/scott/.rgte-rules
+
+* Added -f option to rgte to specify rule set
+
+
+*0.0.1* (January 15, 2008)
+
+* Initial release

@@ -20,9 +20,10 @@ module RGTE
   end
 
   class Filter
-    def initialize(str) #:nodoc:
-      RGTE::Config[:maildir_root] = File.join("#{ENV['HOME']}", 'Maildir')
-      RGTE::Config[:maildir_backup] = File.join("#{ENV['HOME']}", 'Mail-backup')
+    def initialize(str, rules) #:nodoc:
+      RGTE::Config[:maildir_root] = File.join(ENV['HOME'], 'Maildir')
+      RGTE::Config[:maildir_backup] = File.join(ENV['HOME'], 'Mail-backup')
+      RGTE::Config[:rules] = rules || File.join(ENV['HOME'], '.rgte-rules')
       
       @message = TMail::Mail.parse str
       @rgte_message = RGTE::Message.new str
@@ -31,7 +32,7 @@ module RGTE
     
     def process! #:nodoc:
       begin
-        instance_eval(open("/home/scott/.rgte-rules").read)
+        instance_eval(open(RGTE::Config[:rules]).read)
       rescue RGTE::HaltFilter
       ensure
         # TODO if we halt but haven't saved, default to the inbox or don't save?
