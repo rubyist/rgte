@@ -6,6 +6,12 @@ RGTE is a small, opinionated email filter which processes and filters incoming e
 
 RGTE is copyright 2008 Scott Barron.  It is licensed under the MIT license.  See the included MIT-LICENSE file for details.
 
+== Installation
+
+$ [sudo] gem install --source http://rubyi.st/ rgte
+
+One of these days I'll register a Rubyforge project for the gem, but that's such a pain.
+
 == Usage
 
 Set up whatever processes your incoming mail to pipe through rgte.  Examples:
