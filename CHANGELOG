@@ -1,3 +1,7 @@
+*0.0.3* (January 16, 2008)
+
+* Add an inbox directive which sets the default inbox (or no inbox if nil)
+
 *0.0.2* (January 16, 2008)
 
 * Removed hardcoded path to /home/scott/.rgte-rules

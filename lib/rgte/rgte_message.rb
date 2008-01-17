@@ -29,6 +29,8 @@ module RGTE
     end
 
     def save(mailbox)
+      return self if mailbox.nil?
+      
       @mailbox = mailbox
       @saved = true
       self

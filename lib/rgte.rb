@@ -4,7 +4,7 @@ require File.join(File.dirname(__FILE__), 'rgte', 'rgte_blank_message')
 require File.join(File.dirname(__FILE__), 'rgte', 'rgte_filter')
 
 module RGTE
-  VERSION = '0.0.2'
+  VERSION = '0.0.3'
 
   class << self
     def application #:nodoc:

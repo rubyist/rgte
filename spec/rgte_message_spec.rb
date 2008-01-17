@@ -35,6 +35,12 @@ describe RGTE::Message, '- a new message' do
 
     @message.write
   end
+
+  it 'should not be marked saved if save is passed nil' do
+    @message.save(nil)
+    @message.saved?.should be_false
+  end
+  
 end
 
 describe RGTE::Message, '- when writing the message to disk' do
@@ -76,7 +82,7 @@ describe RGTE::Message, '- when writing the message to disk' do
     @message.write
   end
 
-  it 'should create the mailbox director for non inbox' do
+  it 'should create the mailbox directory for non inbox' do
     save_message('lists/dtrace')
     FileUtils.should_receive(:mkdir_p).with('/foo/.lists.dtrace/cur')
 

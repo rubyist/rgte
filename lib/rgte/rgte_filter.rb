@@ -21,6 +21,7 @@ module RGTE
 
   class Filter
     def initialize(str, rules) #:nodoc:
+      RGTE::Config[:inbox] = 'inbox'
       RGTE::Config[:maildir_root] = File.join(ENV['HOME'], 'Maildir')
       RGTE::Config[:maildir_backup] = File.join(ENV['HOME'], 'Mail-backup')
       RGTE::Config[:rules] = rules || File.join(ENV['HOME'], '.rgte-rules')
@@ -36,13 +37,18 @@ module RGTE
       rescue RGTE::HaltFilter
       ensure
         # TODO if we halt but haven't saved, default to the inbox or don't save?
-        @rgte_message.save('inbox') unless @rgte_message.saved?
-        @rgte_message.write
+        @rgte_message.save(RGTE::Config[:inbox]) unless @rgte_message.saved?
+        @rgte_message.write if @rgte_message.saved?
+        exit(@rgte_message.saved? ? 0 : 1)
       end
     end
 
     def config(config_hash)
       config_hash.each { |k, v| RGTE::Config[k] = v }
+    end
+
+    def inbox(mailbox)
+      RGTE::Config[:inbox] = mailbox
     end
 
     def group(name, *args)
@@ -98,6 +104,10 @@ module RGTE
     end
 
     private
+    def has_inbox?
+      !RGTE::Config[:inbox].nil?
+    end
+    
     def address_lookup(addrs)
       addrs.is_a?(Symbol) ? @groups[addrs] : Array(addrs)
     end
