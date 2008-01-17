@@ -5,3 +5,5 @@
 * reply
 * forward
 * rubyforge project
+* properly create maildirs, mkdir -p isn't sufficient
+* ruby 1.9 compatable

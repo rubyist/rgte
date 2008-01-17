@@ -35,7 +35,7 @@ rd = Rake::RDocTask.new("rdoc") do |rdoc|
   rdoc.options << '--line-numbers' << '--inline-source' <<
     '--main' << 'README' <<
     '--title' << 'RGTE'
-  rdoc.rdoc_files.include('README', 'MIT-LICENSE')
+  rdoc.rdoc_files.include('README', 'MIT-LICENSE', 'CHANGELOG')
   rdoc.rdoc_files.include('lib/**/*.rb', 'doc/**/*.rdoc')
 end
 
